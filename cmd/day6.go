@@ -1,51 +1,72 @@
-/*
-Copyright © 2021 NAME HERE <EMAIL ADDRESS>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 )
 
-// day6Cmd represents the day6 command
-var day6Cmd = &cobra.Command{
-	Use:   "day6",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("day6 called")
-	},
-}
-
 func init() {
 	rootCmd.AddCommand(day6Cmd)
 
-	// Here you will define your flags and configuration settings.
+}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// day6Cmd.PersistentFlags().String("foo", "", "A help for foo")
+var day6Cmd = &cobra.Command{
+	Use: "day6",
+	Run: func(cmd *cobra.Command, args []string) {
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Println("Enter input: ")
+		Values, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println(err)
+		}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// day6Cmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+		Vis := Input(Values)
+		Mapepe := make(map[int]int)
+
+		for _, visse := range Vis {
+			Mapepe[visse]++
+		}
+
+		defer println("Een: ", Calc(Mapepe, 80))
+		defer println("Twee: ", Calc(Mapepe, 256))
+	},
+}
+var Mapepe = make(map[string]int)
+
+func Calc(vis map[int]int, days int) int {
+	var counter int
+
+	for vis, values := range vis {
+		counter += (growthCalc(vis, days, 1) * values)
+	}
+
+	return counter
+}
+func growthCalc(vis, dae, counter int) int {
+	vis--
+	dae--
+
+	if vis < 0 && dae >= 0 {
+		vis = 6
+
+		key := fmt.Sprintf("%d:%d", dae, 8)
+
+		if Mapepe[key] != 0 {
+			counter += Mapepe[key]
+		} else {
+			growth := growthCalc(8, dae, 1)
+			counter += growth
+			Mapepe[key] = growth
+		}
+
+	}
+
+	if dae < 0 {
+		return counter
+	}
+
+	return growthCalc(vis, dae, counter)
 }

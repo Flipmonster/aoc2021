@@ -1,51 +1,73 @@
-/*
-Copyright © 2021 NAME HERE <EMAIL ADDRESS>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/spf13/cobra"
 )
 
-// day1Cmd represents the day1 command
 var day1Cmd = &cobra.Command{
-	Use:   "day1",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use: "day1",
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("day1 called")
+
+		input := readFile("cmd/input/day1.txt")
+		fmt.Println(len(input))
+		defer println("Twee: ", twee(input))
+		defer println("Een: ", een(input))
+
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(day1Cmd)
 
-	// Here you will define your flags and configuration settings.
+}
+func een(input []int) int {
+	holdprev := 0
+	counter := 0
+	for _, val := range input {
+		if holdprev != 0 && val > holdprev {
+			counter++
+		}
+		holdprev = val
+	}
+	return counter
+}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// day1Cmd.PersistentFlags().String("foo", "", "A help for foo")
+func twee(input []int) int {
+	counter := 0
+	for i := 1; i+2 < len(input); i = i + 1 {
+		countprev := input[i-1] + input[i] + input[i+1]
+		hold := input[i] + input[i+1] + input[i+2]
+		if hold > countprev {
+			counter++
+		}
+	}
+	return counter
+}
+func readFile(filePath string) (numbers []int) {
+	fd, err := os.Open(filePath)
+	if err != nil {
+		panic(fmt.Sprintf("open %s: %v", filePath, err))
+	}
+	defer fd.Close()
+	var line int
+	for {
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// day1Cmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+		_, err := fmt.Fscanf(fd, "%d\n", &line)
+
+		if err != nil {
+			fmt.Println(err)
+			if err == io.EOF {
+				return
+			}
+			panic(fmt.Sprintf("Scan Failed %s: %v", filePath, err))
+
+		}
+		numbers = append(numbers, line)
+	}
+
 }
